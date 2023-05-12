@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	host := "192.168.1.19:8080"
+	host := "localhost:8080"
 	memoryStorage := memory_storage.NewMemoryStorage()
 
 	polynomialHashShortener, err := shortener.NewPolynomialHashShortener(10)

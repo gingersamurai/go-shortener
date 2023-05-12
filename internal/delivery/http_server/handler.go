@@ -57,6 +57,7 @@ func (hd *Handler) GetLinkHandler(c *gin.Context) {
 	source, err := hd.linkInteractor.GetLink(mapping)
 	if err != nil {
 		c.String(http.StatusBadRequest, errors.Unwrap(err).Error())
+		return
 	}
 	c.Redirect(http.StatusMovedPermanently, source)
 }
