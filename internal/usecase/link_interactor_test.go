@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"github.com/stretchr/testify/assert"
-	"go-shortener/internal/adapters/storage"
-	"go-shortener/internal/adapters/storage/memory_storage"
+	"go-shortener/internal/storage"
+	"go-shortener/internal/storage/memory_storage"
 	"go-shortener/internal/usecase/shortener"
 	"testing"
 )

@@ -2,8 +2,8 @@ package memory_storage
 
 import (
 	"github.com/stretchr/testify/assert"
-	"go-shortener/internal/adapters/storage"
 	"go-shortener/internal/entity"
+	"go-shortener/internal/storage"
 	"testing"
 )
 

@@ -2,8 +2,8 @@ package memory_storage
 
 import (
 	"fmt"
-	"go-shortener/internal/adapters/storage"
 	"go-shortener/internal/entity"
+	"go-shortener/internal/storage"
 	"sync"
 )
 
