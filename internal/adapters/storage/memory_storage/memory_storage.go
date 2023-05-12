@@ -30,11 +30,11 @@ func (ms *MemoryStorage) AddLink(link entity.Link) error {
 	return nil
 }
 
-func (ms *MemoryStorage) GetLink(source string) (entity.Link, error) {
+func (ms *MemoryStorage) GetLink(mapping string) (entity.Link, error) {
 	ms.RLock()
 	defer ms.RUnlock()
 
-	link, ok := ms.data[source]
+	link, ok := ms.data[mapping]
 	if !ok {
 		return entity.Link{}, fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)
 	}
