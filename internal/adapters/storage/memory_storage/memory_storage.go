@@ -34,10 +34,11 @@ func (ms *MemoryStorage) GetLink(mapping string) (entity.Link, error) {
 	ms.RLock()
 	defer ms.RUnlock()
 
-	link, ok := ms.data[mapping]
-	if !ok {
-		return entity.Link{}, fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)
+	for _, link := range ms.data {
+		if link.Mapping == mapping {
+			return link, nil
+		}
 	}
 
-	return link, nil
+	return entity.Link{}, fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)
 }
