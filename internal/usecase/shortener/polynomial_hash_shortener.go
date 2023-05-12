@@ -53,13 +53,13 @@ func reverse(s string) string {
 	return string(runes)
 }
 
-func (phs *PolynomialHashShortener) Shorten(source string) (string, error) {
+func (phs *PolynomialHashShortener) Shorten(string) (string, error) {
 	if phs.count == phs.maxCount {
 		return "", ErrGotMaxCount
 	}
 	result := strings.Builder{}
 	curCount := phs.count
-	for i := 0; int(i) < phs.length; i++ {
+	for i := 0; i < phs.length; i++ {
 		pos := curCount % utf8.RuneCountInString(phs.alphabet)
 		result.WriteRune([]rune(phs.alphabet)[pos])
 		curCount /= utf8.RuneCountInString(phs.alphabet)
