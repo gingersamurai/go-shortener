@@ -26,40 +26,76 @@ func NewPostgresStorage(databaseURL string) (*PostgresStorage, error) {
 }
 
 func (ps *PostgresStorage) AddLink(ctx context.Context, link entity.Link) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
+	resultCh := make(chan error)
+	go func() {
 		requestSQL := "SELECT source FROM links WHERE source = $1"
 		row := ps.conn.QueryRow(ctx, requestSQL, link.Source)
 
 		var source string
 		err := row.Scan(&source)
 		if err == nil {
-			return fmt.Errorf("PostgresStorage.AddLink(): %w", storage.ErrLinkAlreadyExists)
+			resultCh <- fmt.Errorf("PostgresStorage.AddLink(): %w", storage.ErrLinkAlreadyExists)
 		}
 		requestSQL = "INSERT INTO links(source, mapping) VALUES ($1, $2)"
 		_, err = ps.conn.Exec(ctx, requestSQL, link.Source, link.Mapping)
 		if err != nil {
-			return err
+			resultCh <- err
+			return
 		}
-		return nil
+		resultCh <- nil
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case result := <-resultCh:
+		return result
 	}
+
 }
 
 func (ps *PostgresStorage) GetLink(ctx context.Context, mapping string) (entity.Link, error) {
-	select {
-	case <-ctx.Done():
-		return entity.Link{}, ctx.Err()
-	default:
+	resultCh := make(chan struct {
+		link entity.Link
+		err  error
+	})
+	go func() {
 		requestSQL := "SELECT source, mapping FROM links WHERE mapping = $1"
 		row := ps.conn.QueryRow(ctx, requestSQL, mapping)
 		link := entity.Link{}
 		err := row.Scan(&link.Source, &link.Mapping)
 		if err != nil {
-			return entity.Link{}, fmt.Errorf("PostgresStorage.GetLink(): %w", storage.ErrLinkNotFound)
+			resultCh <- struct {
+				link entity.Link
+				err  error
+			}{link: entity.Link{}, err: fmt.Errorf("PostgresStorage.GetLink(): %w", storage.ErrLinkNotFound)}
+			return
 		}
-		return link, nil
+		resultCh <- struct {
+			link entity.Link
+			err  error
+		}{link: link, err: nil}
+	}()
+
+	select {
+	case <-ctx.Done():
+		return entity.Link{}, ctx.Err()
+	case result := <-resultCh:
+		return result.link, result.err
 	}
+
+	//select {
+	//case <-ctx.Done():
+	//	return entity.Link{}, ctx.Err()
+	//default:
+	//	requestSQL := "SELECT source, mapping FROM links WHERE mapping = $1"
+	//	row := ps.conn.QueryRow(ctx, requestSQL, mapping)
+	//	link := entity.Link{}
+	//	err := row.Scan(&link.Source, &link.Mapping)
+	//	if err != nil {
+	//		return entity.Link{}, fmt.Errorf("PostgresStorage.GetLink(): %w", storage.ErrLinkNotFound)
+	//	}
+	//	return link, nil
+	//}
 
 }
