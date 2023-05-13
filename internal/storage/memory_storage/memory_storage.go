@@ -1,6 +1,7 @@
 package memory_storage
 
 import (
+	"context"
 	"fmt"
 	"go-shortener/internal/entity"
 	"go-shortener/internal/storage"
@@ -18,27 +19,38 @@ func NewMemoryStorage() *MemoryStorage {
 	return &MemoryStorage{data: data}
 }
 
-func (ms *MemoryStorage) AddLink(link entity.Link) error {
-	ms.Lock()
-	defer ms.Unlock()
+func (ms *MemoryStorage) AddLink(ctx context.Context, link entity.Link) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		ms.Lock()
+		defer ms.Unlock()
 
-	if _, ok := ms.data[link.Source]; ok {
-		return fmt.Errorf("MemoryStorage.AddLink(): %w", storage.ErrLinkAlreadyExists)
+		if _, ok := ms.data[link.Source]; ok {
+			return fmt.Errorf("MemoryStorage.AddLink(): %w", storage.ErrLinkAlreadyExists)
+		}
+
+		ms.data[link.Source] = link
+		return nil
 	}
 
-	ms.data[link.Source] = link
-	return nil
 }
 
-func (ms *MemoryStorage) GetLink(mapping string) (entity.Link, error) {
-	ms.RLock()
-	defer ms.RUnlock()
+func (ms *MemoryStorage) GetLink(ctx context.Context, mapping string) (entity.Link, error) {
+	select {
+	case <-ctx.Done():
+		return entity.Link{}, ctx.Err()
+	default:
+		defer ms.RUnlock()
+		ms.RLock()
 
-	for _, link := range ms.data {
-		if link.Mapping == mapping {
-			return link, nil
+		for _, link := range ms.data {
+			if link.Mapping == mapping {
+				return link, nil
+			}
 		}
+		return entity.Link{}, fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)
 	}
 
-	return entity.Link{}, fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)
 }

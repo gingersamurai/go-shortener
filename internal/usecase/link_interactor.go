@@ -1,13 +1,14 @@
 package usecase
 
 import (
+	"context"
 	"fmt"
 	"go-shortener/internal/entity"
 )
 
 type Storage interface {
-	AddLink(link entity.Link) error
-	GetLink(mapping string) (entity.Link, error)
+	AddLink(ctx context.Context, link entity.Link) error
+	GetLink(ctx context.Context, mapping string) (entity.Link, error)
 }
 
 type Shortener interface {
@@ -36,7 +37,7 @@ func (li *LinkInteractor) AddLink(source string) (string, error) {
 		Source:  source,
 		Mapping: mapping,
 	}
-	err = li.storage.AddLink(link)
+	err = li.storage.AddLink(context.TODO(), link)
 	if err != nil {
 		return "", fmt.Errorf("LinkInteractor.AddLink(): %w", err)
 	}
@@ -45,7 +46,7 @@ func (li *LinkInteractor) AddLink(source string) (string, error) {
 }
 
 func (li *LinkInteractor) GetLink(mapping string) (string, error) {
-	link, err := li.storage.GetLink(mapping)
+	link, err := li.storage.GetLink(context.TODO(), mapping)
 	if err != nil {
 		return "", fmt.Errorf("LinkInteractor.GetLink(): %w", err)
 	}
