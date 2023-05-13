@@ -27,29 +27,39 @@ func NewLinkInteractor(shortener Shortener, storage Storage) *LinkInteractor {
 	}
 }
 
-func (li *LinkInteractor) AddLink(source string) (string, error) {
-	mapping, err := li.shortener.Shorten(source)
-	if err != nil {
-		return "", fmt.Errorf("LinkInteractor.AddLink(): %w", err)
-	}
+func (li *LinkInteractor) AddLink(ctx context.Context, source string) (string, error) {
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	default:
+		mapping, err := li.shortener.Shorten(source)
+		if err != nil {
+			return "", fmt.Errorf("LinkInteractor.AddLink(): %w", err)
+		}
 
-	link := entity.Link{
-		Source:  source,
-		Mapping: mapping,
-	}
-	err = li.storage.AddLink(context.TODO(), link)
-	if err != nil {
-		return "", fmt.Errorf("LinkInteractor.AddLink(): %w", err)
-	}
+		link := entity.Link{
+			Source:  source,
+			Mapping: mapping,
+		}
+		err = li.storage.AddLink(ctx, link)
+		if err != nil {
+			return "", fmt.Errorf("LinkInteractor.AddLink(): %w", err)
+		}
 
-	return mapping, nil
+		return mapping, nil
+	}
 }
 
-func (li *LinkInteractor) GetLink(mapping string) (string, error) {
-	link, err := li.storage.GetLink(context.TODO(), mapping)
-	if err != nil {
-		return "", fmt.Errorf("LinkInteractor.GetLink(): %w", err)
-	}
+func (li *LinkInteractor) GetLink(ctx context.Context, mapping string) (string, error) {
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	default:
+		link, err := li.storage.GetLink(ctx, mapping)
+		if err != nil {
+			return "", fmt.Errorf("LinkInteractor.GetLink(): %w", err)
+		}
 
-	return link.Source, nil
+		return link.Source, nil
+	}
 }
