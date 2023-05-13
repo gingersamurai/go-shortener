@@ -20,37 +20,74 @@ func NewMemoryStorage() *MemoryStorage {
 }
 
 func (ms *MemoryStorage) AddLink(ctx context.Context, link entity.Link) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
+	resultCh := make(chan error)
+	go func() {
 		ms.Lock()
 		defer ms.Unlock()
-
 		if _, ok := ms.data[link.Source]; ok {
-			return fmt.Errorf("MemoryStorage.AddLink(): %w", storage.ErrLinkAlreadyExists)
+			resultCh <- fmt.Errorf("MemoryStorage.AddLink(): %w", storage.ErrLinkAlreadyExists)
+			return
 		}
 
 		ms.data[link.Source] = link
-		return nil
-	}
+		resultCh <- nil
+	}()
 
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case result := <-resultCh:
+		return result
+	}
 }
 
 func (ms *MemoryStorage) GetLink(ctx context.Context, mapping string) (entity.Link, error) {
-	select {
-	case <-ctx.Done():
-		return entity.Link{}, ctx.Err()
-	default:
-		defer ms.RUnlock()
+	resultCh := make(chan struct {
+		link entity.Link
+		err  error
+	})
+
+	go func() {
 		ms.RLock()
+		defer ms.RUnlock()
 
 		for _, link := range ms.data {
 			if link.Mapping == mapping {
-				return link, nil
+				//return link, nil
+				resultCh <- struct {
+					link entity.Link
+					err  error
+				}{link: link, err: nil}
+				return
 			}
+
 		}
-		return entity.Link{}, fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)
+		resultCh <- struct {
+			link entity.Link
+			err  error
+		}{link: entity.Link{}, err: fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)}
+		return
+	}()
+
+	select {
+	case <-ctx.Done():
+		return entity.Link{}, ctx.Err()
+	case result := <-resultCh:
+		return result.link, result.err
 	}
+	//select {
+	//case <-ctx.Done():
+	//	return entity.Link{}, ctx.Err()
+	//default:
+	//	defer ms.RUnlock()
+	//	ms.RLock()
+	//
+	//	for _, link := range ms.data {
+	//		if link.Mapping == mapping {
+	//			return link, nil
+	//		}
+	//	}
+	//	return entity.Link{}, fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)
+	//}
 
 }
