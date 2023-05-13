@@ -28,13 +28,20 @@ func NewLinkInteractor(shortener Shortener, storage Storage) *LinkInteractor {
 }
 
 func (li *LinkInteractor) AddLink(ctx context.Context, source string) (string, error) {
-	select {
-	case <-ctx.Done():
-		return "", ctx.Err()
-	default:
+	resultCh := make(chan struct {
+		mapping string
+		err     error
+	})
+
+	go func() {
+		defer close(resultCh)
 		mapping, err := li.shortener.Shorten(source)
 		if err != nil {
-			return "", fmt.Errorf("LinkInteractor.AddLink(): %w", err)
+			resultCh <- struct {
+				mapping string
+				err     error
+			}{mapping: "", err: fmt.Errorf("LinkInteractor.AddLink(): %w", err)}
+			return
 		}
 
 		link := entity.Link{
@@ -43,23 +50,52 @@ func (li *LinkInteractor) AddLink(ctx context.Context, source string) (string, e
 		}
 		err = li.storage.AddLink(ctx, link)
 		if err != nil {
-			return "", fmt.Errorf("LinkInteractor.AddLink(): %w", err)
+			resultCh <- struct {
+				mapping string
+				err     error
+			}{mapping: "", err: fmt.Errorf("LinkInteractor.AddLink(): %w", err)}
+			return
 		}
+		resultCh <- struct {
+			mapping string
+			err     error
+		}{mapping: mapping, err: nil}
+	}()
 
-		return mapping, nil
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	case result := <-resultCh:
+		return result.mapping, result.err
 	}
 }
 
 func (li *LinkInteractor) GetLink(ctx context.Context, mapping string) (string, error) {
+	resultCh := make(chan struct {
+		source string
+		err    error
+	})
+
+	go func() {
+		defer close(resultCh)
+		link, err := li.storage.GetLink(ctx, mapping)
+		if err != nil {
+			resultCh <- struct {
+				source string
+				err    error
+			}{source: "", err: fmt.Errorf("LinkInteractor.GetLink(): %w", err)}
+			return
+		}
+		resultCh <- struct {
+			source string
+			err    error
+		}{source: link.Source, err: nil}
+	}()
+
 	select {
 	case <-ctx.Done():
 		return "", ctx.Err()
-	default:
-		link, err := li.storage.GetLink(ctx, mapping)
-		if err != nil {
-			return "", fmt.Errorf("LinkInteractor.GetLink(): %w", err)
-		}
-
-		return link.Source, nil
+	case result := <-resultCh:
+		return result.source, result.err
 	}
 }

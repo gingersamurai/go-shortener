@@ -22,6 +22,7 @@ func NewMemoryStorage() *MemoryStorage {
 func (ms *MemoryStorage) AddLink(ctx context.Context, link entity.Link) error {
 	resultCh := make(chan error)
 	go func() {
+		defer close(resultCh)
 		ms.Lock()
 		defer ms.Unlock()
 		if _, ok := ms.data[link.Source]; ok {
@@ -46,8 +47,8 @@ func (ms *MemoryStorage) GetLink(ctx context.Context, mapping string) (entity.Li
 		link entity.Link
 		err  error
 	})
-
 	go func() {
+		defer close(resultCh)
 		ms.RLock()
 		defer ms.RUnlock()
 
@@ -75,19 +76,4 @@ func (ms *MemoryStorage) GetLink(ctx context.Context, mapping string) (entity.Li
 	case result := <-resultCh:
 		return result.link, result.err
 	}
-	//select {
-	//case <-ctx.Done():
-	//	return entity.Link{}, ctx.Err()
-	//default:
-	//	defer ms.RUnlock()
-	//	ms.RLock()
-	//
-	//	for _, link := range ms.data {
-	//		if link.Mapping == mapping {
-	//			return link, nil
-	//		}
-	//	}
-	//	return entity.Link{}, fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)
-	//}
-
 }

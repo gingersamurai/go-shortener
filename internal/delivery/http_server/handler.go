@@ -1,20 +1,24 @@
 package http_server
 
 import (
+	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go-shortener/internal/usecase"
 	"net/http"
+	"time"
 )
 
 type Handler struct {
 	host           string
+	handleTimeout  time.Duration
 	linkInteractor *usecase.LinkInteractor
 }
 
-func NewHandler(host string, linkInteractor *usecase.LinkInteractor) *Handler {
+func NewHandler(host string, handleTimeout time.Duration, linkInteractor *usecase.LinkInteractor) *Handler {
 	return &Handler{
 		host:           host,
+		handleTimeout:  handleTimeout,
 		linkInteractor: linkInteractor,
 	}
 }
@@ -22,6 +26,9 @@ func NewHandler(host string, linkInteractor *usecase.LinkInteractor) *Handler {
 // POST /shorten
 
 func (hd *Handler) AddLinkHandler(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), hd.handleTimeout)
+	defer cancel()
+
 	type RequestLink struct {
 		Source string `json:"source"`
 	}
@@ -32,9 +39,9 @@ func (hd *Handler) AddLinkHandler(c *gin.Context) {
 		return
 	}
 
-	mapping, err := hd.linkInteractor.AddLink(requestLink.Source)
+	mapping, err := hd.linkInteractor.AddLink(ctx, requestLink.Source)
 	if err != nil {
-		c.String(http.StatusBadRequest, errors.Unwrap(err).Error())
+		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -53,8 +60,11 @@ func (hd *Handler) AddLinkHandler(c *gin.Context) {
 //get /:mapping
 
 func (hd *Handler) GetLinkHandler(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), hd.handleTimeout)
+	defer cancel()
+
 	mapping := c.Params.ByName("mapping")
-	source, err := hd.linkInteractor.GetLink(mapping)
+	source, err := hd.linkInteractor.GetLink(ctx, mapping)
 	if err != nil {
 		c.String(http.StatusBadRequest, errors.Unwrap(err).Error())
 		return
