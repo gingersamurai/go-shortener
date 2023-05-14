@@ -1,0 +1,17 @@
+services:
+  app:
+    build: ./
+    environment:
+      - GIN_MODE=release
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    command: ["db", "./build/go-shortener-server"]
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 12345678
+    ports:
+      - "5432:5432"

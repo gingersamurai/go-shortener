@@ -9,7 +9,7 @@ http_server:
   listen_addr: ":8080"
 
 postgres:
-  host: localhost
+  host: db
   user: postgres
   password: 12345678
   dbname: postgres
