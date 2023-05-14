@@ -1,0 +1,12 @@
+storage_type: postgres
+shutdown_timeout: 5s
+
+http_server:
+  listen_addr: "localhost:8080"
+  handle_timeout: 10s
+
+postgres:
+  host: localhost
+  user: postgres
+  password: 12345678
+  dbname: postgres

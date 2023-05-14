@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"go-shortener/internal/config"
 	"go-shortener/internal/usecase"
 	"net/http"
 	"time"
@@ -16,13 +17,13 @@ type Handler struct {
 	linkInteractor *usecase.LinkInteractor
 }
 
-func NewHandler(host string, handleTimeout time.Duration, linkInteractor *usecase.LinkInteractor) *Handler {
+func NewHandler(httpServerConfig config.HttpServerConfig, linkInteractor *usecase.LinkInteractor) *Handler {
 	engine := gin.Default()
 
 	handler := &Handler{
 		engine:         engine,
-		host:           host,
-		handleTimeout:  handleTimeout,
+		host:           httpServerConfig.ListenAddr,
+		handleTimeout:  httpServerConfig.HandleTimeout,
 		linkInteractor: linkInteractor,
 	}
 

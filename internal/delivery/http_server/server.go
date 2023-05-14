@@ -3,23 +3,22 @@ package http_server
 import (
 	"context"
 	"fmt"
+	"go-shortener/internal/config"
 	"log"
 	"net/http"
 )
 
 type Server struct {
-	host   string
 	server *http.Server
 }
 
-func NewServer(host string, handler *Handler) *Server {
+func NewServer(httpServerConfig config.HttpServerConfig, handler *Handler) *Server {
 	server := &http.Server{
-		Addr:    host,
+		Addr:    httpServerConfig.ListenAddr,
 		Handler: handler.engine,
 	}
 
 	return &Server{
-		host:   host,
 		server: server,
 	}
 }

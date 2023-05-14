@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5"
+	"go-shortener/internal/config"
 	"go-shortener/internal/entity"
 	"go-shortener/internal/storage"
 	"log"
@@ -13,8 +14,13 @@ type PostgresStorage struct {
 	conn *pgx.Conn
 }
 
-func NewPostgresStorage(databaseURL string) (*PostgresStorage, error) {
-	conn, err := pgx.Connect(context.Background(), databaseURL)
+func NewPostgresStorage(postgresConfig config.PostgresConfig) (*PostgresStorage, error) {
+	conn, err := pgx.Connect(context.Background(), fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s",
+		postgresConfig.Host,
+		postgresConfig.User,
+		postgresConfig.Password,
+		postgresConfig.DBName))
 	if err != nil {
 		return nil, err
 	}
