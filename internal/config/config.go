@@ -13,13 +13,18 @@ const (
 type Config struct {
 	StorageType     string           `mapstructure:"storage_type"`
 	ShutdownTimeout time.Duration    `mapstructure:"shutdown_timeout"`
+	Handler         HandlerConfig    `mapstructure:"handler"`
 	HttpServer      HttpServerConfig `mapstructure:"http_server"`
 	Postgres        PostgresConfig   `mapstructure:"postgres"`
 }
 
-type HttpServerConfig struct {
-	ListenAddr    string        `mapstructure:"listen_addr"`
+type HandlerConfig struct {
+	HostAddr      string        `mapstructure:"host_addr"`
 	HandleTimeout time.Duration `mapstructure:"handle_timeout"`
+}
+
+type HttpServerConfig struct {
+	ListenAddr string `mapstructure:"listen_addr"`
 }
 
 type PostgresConfig struct {

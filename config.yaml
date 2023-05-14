@@ -1,9 +1,12 @@
 storage_type: postgres
 shutdown_timeout: 5s
 
-http_server:
-  listen_addr: "localhost:8080"
+handler:
+  host_addr: "localhost:8080"
   handle_timeout: 10s
+
+http_server:
+  listen_addr: ":8080"
 
 postgres:
   host: localhost

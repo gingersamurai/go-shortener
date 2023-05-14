@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"github.com/davecgh/go-spew/spew"
 	"go-shortener/internal/config"
 	"go-shortener/internal/delivery/http_server"
 	"go-shortener/internal/storage/memory_storage"
@@ -34,7 +33,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	spew.Dump(appConfig)
 	appCloser := closer.NewCloser(appConfig.ShutdownTimeout)
 
 	appStorage, err := chooseStorage(appConfig, appCloser)
@@ -49,7 +47,7 @@ func main() {
 
 	linkInteractor := usecase.NewLinkInteractor(appShortener, appStorage)
 
-	handler := http_server.NewHandler(appConfig.HttpServer, linkInteractor)
+	handler := http_server.NewHandler(appConfig.Handler, linkInteractor)
 	server := http_server.NewServer(appConfig.HttpServer, handler)
 	appCloser.Add(server.Shutdown)
 

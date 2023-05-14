@@ -12,18 +12,18 @@ import (
 
 type Handler struct {
 	engine         *gin.Engine
-	host           string
+	hostAddr       string
 	handleTimeout  time.Duration
 	linkInteractor *usecase.LinkInteractor
 }
 
-func NewHandler(httpServerConfig config.HttpServerConfig, linkInteractor *usecase.LinkInteractor) *Handler {
+func NewHandler(handlerConfig config.HandlerConfig, linkInteractor *usecase.LinkInteractor) *Handler {
 	engine := gin.Default()
 
 	handler := &Handler{
 		engine:         engine,
-		host:           httpServerConfig.ListenAddr,
-		handleTimeout:  httpServerConfig.HandleTimeout,
+		hostAddr:       handlerConfig.HostAddr,
+		handleTimeout:  handlerConfig.HandleTimeout,
 		linkInteractor: linkInteractor,
 	}
 
@@ -60,7 +60,7 @@ func (hd *Handler) AddLinkHandler(c *gin.Context) {
 	}
 
 	responseLink := ResponseLink{
-		ShortenLink: hd.host + "/" + mapping,
+		ShortenLink: hd.hostAddr + "/" + mapping,
 	}
 
 	c.JSON(http.StatusOK, responseLink)
