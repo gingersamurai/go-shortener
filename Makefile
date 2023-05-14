@@ -6,7 +6,6 @@ build:
 	go build -o build/go-shortener-server go-shortener/cmd/server
 test:
 	go test go-shortener/...
-
 migrate_init:
 	goose -dir ./migrations -s postgres "host=localhost user=postgres password=12345678" up
 

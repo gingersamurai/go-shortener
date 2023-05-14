@@ -5,28 +5,42 @@ import (
 	"go-shortener/internal/storage/postgres_storage"
 	"go-shortener/internal/usecase"
 	"go-shortener/internal/usecase/shortener"
+	"go-shortener/pkg/closer"
 	"log"
 	"time"
 )
 
+const (
+	host            = "localhost:8080"
+	handleTimeout   = time.Second * 5
+	shutdownTimeout = time.Second * 2
+)
+
 func main() {
-	host := "localhost:8080"
-	handleDeadline := time.Second * 15
 
-	postgresStorage, err := postgres_storage.NewPostgresStorage("host=localhost user=postgres password=12345678")
+	appCloser := closer.NewCloser(shutdownTimeout)
+
+	appStorage, err := postgres_storage.NewPostgresStorage("host=localhost user=postgres password=12345678")
+	if err != nil {
+		log.Fatal(err)
+	}
+	appCloser.Add(appStorage.Shutdown)
+
+	//memoryStorage := memory_storage.NewMemoryStorage()
+
+	appShortener, err := shortener.NewPolynomialHashShortener(10)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	polynomialHashShortener, err := shortener.NewPolynomialHashShortener(10)
-	if err != nil {
-		log.Fatal(err)
-	}
+	linkInteractor := usecase.NewLinkInteractor(appShortener, appStorage)
 
-	linkInteractor := usecase.NewLinkInteractor(polynomialHashShortener, postgresStorage)
-
-	handler := http_server.NewHandler(host, handleDeadline, linkInteractor)
+	handler := http_server.NewHandler(host, handleTimeout, linkInteractor)
 	server := http_server.NewServer(host, handler)
+	appCloser.Add(server.Shutdown)
 
-	log.Fatal(server.Run())
+	go server.Run()
+
+	appCloser.Run()
+
 }

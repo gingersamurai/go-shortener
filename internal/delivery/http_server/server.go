@@ -2,6 +2,7 @@ package http_server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -23,11 +24,15 @@ func NewServer(host string, handler *Handler) *Server {
 	}
 }
 
-func (s *Server) Run() error {
-	return s.server.ListenAndServe()
+func (s *Server) Run() {
+	_ = s.server.ListenAndServe()
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
-	log.Println("graceful shutdown server")
-	return s.server.Shutdown(ctx)
+	log.Println("started server shutdown")
+	defer log.Println("finished server shutdown")
+	if err := s.server.Shutdown(ctx); err != nil {
+		return fmt.Errorf("server: %w", s.server.Shutdown(ctx))
+	}
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"go-shortener/internal/entity"
 	"go-shortener/internal/storage"
+	"log"
 )
 
 type PostgresStorage struct {
@@ -52,4 +53,14 @@ func (ps *PostgresStorage) GetLink(ctx context.Context, mapping string) (entity.
 		return entity.Link{}, fmt.Errorf("PostgresStorage.GetLink(): %w", storage.ErrLinkNotFound)
 	}
 	return link, nil
+}
+
+func (ps *PostgresStorage) Shutdown(ctx context.Context) error {
+	log.Println("started postgres connection shutdown")
+	defer log.Println("finished postgres connection shutdown")
+
+	if err := ps.conn.Close(ctx); err != nil {
+		return fmt.Errorf("postgres storage: %w", err)
+	}
+	return nil
 }
