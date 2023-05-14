@@ -10,17 +10,26 @@ import (
 )
 
 type Handler struct {
+	engine         *gin.Engine
 	host           string
 	handleTimeout  time.Duration
 	linkInteractor *usecase.LinkInteractor
 }
 
 func NewHandler(host string, handleTimeout time.Duration, linkInteractor *usecase.LinkInteractor) *Handler {
-	return &Handler{
+	engine := gin.Default()
+
+	handler := &Handler{
+		engine:         engine,
 		host:           host,
 		handleTimeout:  handleTimeout,
 		linkInteractor: linkInteractor,
 	}
+
+	handler.engine.POST("/shorten", handler.AddLinkHandler)
+	handler.engine.GET("/:mapping", handler.GetLinkHandler)
+
+	return handler
 }
 
 // POST /shorten

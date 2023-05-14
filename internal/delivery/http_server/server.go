@@ -1,24 +1,33 @@
 package http_server
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+	"log"
+	"net/http"
+)
 
 type Server struct {
 	host   string
-	engine *gin.Engine
+	server *http.Server
 }
 
 func NewServer(host string, handler *Handler) *Server {
-	engine := gin.Default()
-
-	engine.POST("/shorten", handler.AddLinkHandler)
-	engine.GET("/:mapping", handler.GetLinkHandler)
+	server := &http.Server{
+		Addr:    host,
+		Handler: handler.engine,
+	}
 
 	return &Server{
 		host:   host,
-		engine: engine,
+		server: server,
 	}
 }
 
 func (s *Server) Run() error {
-	return s.engine.Run(s.host)
+	return s.server.ListenAndServe()
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	log.Println("graceful shutdown server")
+	return s.server.Shutdown(ctx)
 }
