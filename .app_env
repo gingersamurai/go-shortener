@@ -1,0 +1,4 @@
+POSTGRES_PASSWORD=12345678
+GOOSE_DRIVER=postgres
+GOOSE_DBSTRING='host=db user=postgres password=12345678'
+GIN_MODE=release

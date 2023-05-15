@@ -1,8 +1,8 @@
 services:
   app:
     build: ./
-    environment:
-      - GIN_MODE=release
+    env_file:
+      - .app_env
     ports:
       - "8080:8080"
     depends_on:

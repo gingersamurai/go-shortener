@@ -28,10 +28,9 @@ type HttpServerConfig struct {
 }
 
 type PostgresConfig struct {
-	Host     string `mapstructure:"host"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-	DBName   string `mapstructure:"dbname"`
+	Host   string `mapstructure:"host"`
+	User   string `mapstructure:"user"`
+	DBName string `mapstructure:"dbname"`
 }
 
 func NewConfig(configFilePath, configFileName string) (Config, error) {

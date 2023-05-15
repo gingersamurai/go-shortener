@@ -8,6 +8,7 @@ import (
 	"go-shortener/internal/entity"
 	"go-shortener/internal/storage"
 	"log"
+	"os"
 )
 
 type PostgresStorage struct {
@@ -19,7 +20,7 @@ func NewPostgresStorage(postgresConfig config.PostgresConfig) (*PostgresStorage,
 		"host=%s user=%s password=%s dbname=%s",
 		postgresConfig.Host,
 		postgresConfig.User,
-		postgresConfig.Password,
+		os.Getenv("POSTGRES_PASSWORD"),
 		postgresConfig.DBName))
 	if err != nil {
 		return nil, err
