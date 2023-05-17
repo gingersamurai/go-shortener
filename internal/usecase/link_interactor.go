@@ -46,15 +46,10 @@ func (li *LinkInteractor) AddLink(ctx context.Context, source string) (string, e
 }
 
 func (li *LinkInteractor) GetLink(ctx context.Context, mapping string) (string, error) {
-	select {
-	case <-ctx.Done():
-		return "", ctx.Err()
-	default:
-		link, err := li.storage.GetLink(ctx, mapping)
-		if err != nil {
-			return "", fmt.Errorf("LinkInteractor.GetLink(): %w", err)
-		}
-
-		return link.Source, nil
+	link, err := li.storage.GetLink(ctx, mapping)
+	if err != nil {
+		return "", fmt.Errorf("LinkInteractor.GetLink(): %w", err)
 	}
+
+	return link.Source, nil
 }

@@ -1,4 +1,4 @@
-package shortener
+package polynomial_hash_shortener
 
 import (
 	"github.com/stretchr/testify/assert"

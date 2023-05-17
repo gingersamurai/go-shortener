@@ -7,8 +7,8 @@ import (
 	"go-shortener/internal/storage/memory_storage"
 	"go-shortener/internal/storage/postgres_storage"
 	"go-shortener/internal/usecase"
-	"go-shortener/internal/usecase/shortener"
 	"go-shortener/pkg/closer"
+	"go-shortener/pkg/polynomial_hash_shortener"
 	"log"
 )
 
@@ -40,7 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	appShortener, err := shortener.NewPolynomialHashShortener(10)
+	appShortener, err := polynomial_hash_shortener.NewPolynomialHashShortener(10)
 	if err != nil {
 		log.Fatal(err)
 	}

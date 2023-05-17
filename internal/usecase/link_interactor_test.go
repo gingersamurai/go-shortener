@@ -5,14 +5,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go-shortener/internal/storage"
 	"go-shortener/internal/storage/memory_storage"
-	"go-shortener/internal/usecase/shortener"
+	"go-shortener/pkg/polynomial_hash_shortener"
 	"testing"
 )
 
 func TestLinkInteractor(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		ctx := context.Background()
-		phs, err := shortener.NewPolynomialHashShortener(5)
+		phs, err := polynomial_hash_shortener.NewPolynomialHashShortener(5)
 		assert.NoError(t, err)
 		ms := memory_storage.NewMemoryStorage()
 		li := NewLinkInteractor(phs, ms)
@@ -28,7 +28,7 @@ func TestLinkInteractor(t *testing.T) {
 
 	t.Run("link already exist", func(t *testing.T) {
 		ctx := context.Background()
-		phs, err := shortener.NewPolynomialHashShortener(5)
+		phs, err := polynomial_hash_shortener.NewPolynomialHashShortener(5)
 		assert.NoError(t, err)
 		ms := memory_storage.NewMemoryStorage()
 		li := NewLinkInteractor(phs, ms)
@@ -44,7 +44,7 @@ func TestLinkInteractor(t *testing.T) {
 
 	t.Run("wrong link", func(t *testing.T) {
 		ctx := context.Background()
-		phs, err := shortener.NewPolynomialHashShortener(5)
+		phs, err := polynomial_hash_shortener.NewPolynomialHashShortener(5)
 		assert.NoError(t, err)
 		ms := memory_storage.NewMemoryStorage()
 		li := NewLinkInteractor(phs, ms)
@@ -59,7 +59,7 @@ func TestLinkInteractor(t *testing.T) {
 
 	t.Run("with cancel", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
-		phs, err := shortener.NewPolynomialHashShortener(5)
+		phs, err := polynomial_hash_shortener.NewPolynomialHashShortener(5)
 		assert.NoError(t, err)
 		ms := memory_storage.NewMemoryStorage()
 		li := NewLinkInteractor(phs, ms)

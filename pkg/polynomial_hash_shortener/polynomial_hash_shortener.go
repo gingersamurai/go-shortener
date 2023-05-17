@@ -1,4 +1,4 @@
-package shortener
+package polynomial_hash_shortener
 
 import (
 	"errors"
