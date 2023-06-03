@@ -1,0 +1,13 @@
+syntax = "proto3";
+package link;
+option go_package = "go-shortener/api/link";
+
+message Link {
+  string value = 1;
+}
+
+service LinkShortenerService {
+  rpc AddLink(Link) returns (Link) {}
+  rpc GetLink(Link) returns (Link) {}
+}
+
