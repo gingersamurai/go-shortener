@@ -2,7 +2,6 @@ package grpc_server
 
 import (
 	"context"
-	"fmt"
 	"go-shortener/api/link"
 	"go-shortener/internal/config"
 	"google.golang.org/grpc"
@@ -30,7 +29,6 @@ func NewServer(serverConfig config.GrpcServerConfig, handler *Handler) (*Server,
 }
 
 func (s *Server) Run() {
-	fmt.Println("grpc starting on", s.lis.Addr())
 	err := s.engine.Serve(s.lis)
 	if err != nil {
 		panic(err)

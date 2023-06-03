@@ -60,7 +60,7 @@ func main() {
 	}
 	appCloser.Add(grpcServer.Shutdown)
 	go grpcServer.Run()
-	log.Println("started grpc with separate goroutine")
+
 	appCloser.Run()
 
 }
