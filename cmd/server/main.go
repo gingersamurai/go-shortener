@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"go-shortener/internal/config"
+	"go-shortener/internal/delivery/grpc_server"
 	"go-shortener/internal/delivery/http_server"
 	"go-shortener/internal/storage/memory_storage"
 	"go-shortener/internal/storage/postgres_storage"
@@ -50,9 +51,16 @@ func main() {
 	handler := http_server.NewHandler(appConfig.Handler, linkInteractor)
 	server := http_server.NewServer(appConfig.HttpServer, handler)
 	appCloser.Add(server.Shutdown)
-
 	go server.Run()
 
+	grpcHandler := grpc_server.NewHandler(appConfig.Handler, linkInteractor)
+	grpcServer, err := grpc_server.NewServer(appConfig.GrpcServer, grpcHandler)
+	if err != nil {
+		log.Fatal(err)
+	}
+	appCloser.Add(grpcServer.Shutdown)
+	go grpcServer.Run()
+	log.Println("started grpc with separate goroutine")
 	appCloser.Run()
 
 }
