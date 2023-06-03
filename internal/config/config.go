@@ -15,6 +15,7 @@ type Config struct {
 	ShutdownTimeout time.Duration    `mapstructure:"shutdown_timeout"`
 	Handler         HandlerConfig    `mapstructure:"handler"`
 	HttpServer      HttpServerConfig `mapstructure:"http_server"`
+	GrpcServer      GrpcServerConfig `mapstructure:"grpc_server"`
 	Postgres        PostgresConfig   `mapstructure:"postgres"`
 }
 
@@ -24,6 +25,10 @@ type HandlerConfig struct {
 }
 
 type HttpServerConfig struct {
+	ListenAddr string `mapstructure:"listen_addr"`
+}
+
+type GrpcServerConfig struct {
 	ListenAddr string `mapstructure:"listen_addr"`
 }
 

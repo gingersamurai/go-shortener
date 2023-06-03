@@ -18,6 +18,9 @@ http_server:
 # адрес, на котором сервер слушает входящие запросы
   listen_addr: ":8080"
 
+grpc_server:
+  listen_addr: ":8081"
+
 # конфигурация postgres
 # пароль отдельно задается в переменной окружения POSTGRES_PASSWORD
 postgres:
