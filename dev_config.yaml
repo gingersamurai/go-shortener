@@ -1,0 +1,29 @@
+#тип хранилища данных
+#memory или postgres
+#для postgres нужно дополнительно указать конфигурацию
+storage_type: postgres
+
+#таймаут закрытия сервисов для graceful shutdown.
+shutdown_timeout: 5s
+
+#конфигурация обработчика
+handler:
+  #  адрес сервера для перенаправления пользователей
+  host_addr: "localhost:8080"
+  # таймаут обработки запроса
+  handle_timeout: 10s
+
+# конфигурация http сервера
+http_server:
+  # адрес, на котором сервер слушает входящие запросы
+  listen_addr: ":8080"
+
+grpc_server:
+  listen_addr: ":8081"
+
+# конфигурация postgres
+# пароль отдельно задается в переменной окружения POSTGRES_PASSWORD
+postgres:
+  host: localhost
+  user: postgres
+  dbname: postgres
