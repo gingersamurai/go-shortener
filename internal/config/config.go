@@ -2,12 +2,9 @@ package config
 
 import (
 	"github.com/spf13/viper"
+	"path/filepath"
+	"strings"
 	"time"
-)
-
-const (
-	ConfigFilePath = "./"
-	ConfigFileName = "config"
 )
 
 type Config struct {
@@ -38,9 +35,17 @@ type PostgresConfig struct {
 	DBName string `mapstructure:"dbname"`
 }
 
-func NewConfig(configFilePath, configFileName string) (Config, error) {
+func NewConfig(configFilePath string) (Config, error) {
+	absPath, err := filepath.Abs(configFilePath)
+	if err != nil {
+		return Config{}, err
+	}
+	configFileDir, configFileName := filepath.Split(absPath)
+	id := strings.LastIndex(configFileName, ".")
+	configFileName = configFileName[:id]
+
 	myViper := viper.New()
-	myViper.AddConfigPath(configFilePath)
+	myViper.AddConfigPath(configFileDir)
 	myViper.SetConfigName(configFileName)
 
 	if err := myViper.ReadInConfig(); err != nil {

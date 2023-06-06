@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"go-shortener/internal/config"
 	"go-shortener/internal/delivery/grpc_server"
 	"go-shortener/internal/delivery/http_server"
@@ -29,8 +30,21 @@ func chooseStorage(appConfig config.Config, appCloser *closer.Closer) (usecase.S
 	}
 }
 
+func getConfigPath() (string, error) {
+	configPath := flag.String("config", "", "path to config file")
+	flag.Parse()
+	if configPath == nil {
+		return "", errors.New("bad config path")
+	}
+	return *configPath, nil
+}
+
 func main() {
-	appConfig, err := config.NewConfig(config.ConfigFilePath, config.ConfigFileName)
+	configPath, err := getConfigPath()
+	if err != nil {
+		log.Fatal(err)
+	}
+	appConfig, err := config.NewConfig(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
