@@ -33,7 +33,7 @@ func chooseStorage(appConfig config.Config, appCloser *closer.Closer) (usecase.S
 func getConfigPath() (string, error) {
 	configPath := flag.String("config", "", "path to config file")
 	flag.Parse()
-	if configPath == nil {
+	if *configPath == "" {
 		return "", errors.New("bad config path")
 	}
 	return *configPath, nil
