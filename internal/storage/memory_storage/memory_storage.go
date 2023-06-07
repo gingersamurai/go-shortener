@@ -67,7 +67,6 @@ func (ms *MemoryStorage) GetLink(ctx context.Context, mapping string) (entity.Li
 			link entity.Link
 			err  error
 		}{link: entity.Link{}, err: fmt.Errorf("MemoryStorage.GetLink(): %w", storage.ErrLinkNotFound)}
-		return
 	}()
 
 	select {

@@ -27,7 +27,7 @@ func NewHandler(handlerConfig config.HandlerConfig, linkInteractor *usecase.Link
 }
 
 func (h *Handler) AddLink(ctx context.Context, in *link.Link) (*link.Link, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), h.handleTimeout)
+	ctx, cancel := context.WithTimeout(ctx, h.handleTimeout)
 	defer cancel()
 
 	mapping, err := h.linkInteractor.AddLink(ctx, in.Value)
@@ -40,7 +40,7 @@ func (h *Handler) AddLink(ctx context.Context, in *link.Link) (*link.Link, error
 }
 
 func (h *Handler) GetLink(ctx context.Context, in *link.Link) (*link.Link, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), h.handleTimeout)
+	ctx, cancel := context.WithTimeout(ctx, h.handleTimeout)
 	defer cancel()
 	id := strings.LastIndex(in.Value, "/")
 	if id == -1 {
